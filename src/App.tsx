@@ -28,15 +28,9 @@ function LandingPage({ onLogin, backendReady }: { onLogin: () => void, backendRe
           <span className="hover:text-violet-600 cursor-pointer transition">Technology</span>
           <span className="hover:text-violet-600 cursor-pointer transition">Company</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest hidden md:flex ${backendReady ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.3)]'}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${backendReady ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
-            {backendReady ? 'AI Engine Ready' : 'Waking Up Engine... (~50s)'}
-          </div>
-          <button onClick={onLogin} className="text-xs font-mono uppercase tracking-widest text-slate-700 hover:text-slate-900 transition-colors bg-white/50 hover:bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
-            Get started
-          </button>
-        </div>
+        <button onClick={onLogin} className="text-xs font-mono uppercase tracking-widest text-slate-700 hover:text-slate-900 transition-colors bg-white/50 hover:bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
+          Get started
+        </button>
       </nav>
 
       <main className="relative z-10 flex-grow flex flex-col items-center justify-start px-4 sm:px-6 pt-16 pb-32">
@@ -216,6 +210,92 @@ export default function App() {
     await signOut(auth);
   };
 
+function BackendWarmupScreen({ user, onLogout }: { user: User, onLogout: () => void }) {
+  const [progress, setProgress] = useState(0);
+  const [statusText, setStatusText] = useState("Initializing AI Engine...");
+
+  useEffect(() => {
+    const start = Date.now();
+    const duration = 50000; // 50 seconds for Render to wake up
+    
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const calculatedProgress = Math.min(Math.round((elapsed / duration) * 100), 98);
+      setProgress(calculatedProgress);
+
+      if (calculatedProgress < 25) {
+        setStatusText("Booting secure Express container...");
+      } else if (calculatedProgress < 50) {
+        setStatusText("Connecting to Gemini AI APIs...");
+      } else if (calculatedProgress < 75) {
+        setStatusText("Warming up Vision defection systems...");
+      } else {
+        setStatusText("Almost ready, establishing secure socket handshake...");
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FA] text-slate-900 font-sans selection:bg-violet-500/30 relative overflow-hidden flex flex-col items-center justify-center p-6">
+      {/* Background ambient glows */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-600/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-600/10 blur-[150px] pointer-events-none" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md bg-white border border-slate-200 shadow-2xl shadow-slate-200/50 rounded-[2rem] p-8 sm:p-12 relative z-10 flex flex-col items-center text-center"
+      >
+        {/* Animated Icon */}
+        <div className="w-16 h-16 rounded-full bg-violet-50 border border-violet-100 flex items-center justify-center mb-6 relative">
+          <Sparkles className="w-8 h-8 text-violet-600 animate-pulse" />
+          <div className="absolute inset-0 border border-dashed border-violet-300 rounded-full animate-spin [animation-duration:10s]"></div>
+        </div>
+
+        <h2 className="text-2xl font-display font-medium tracking-tight text-slate-900 mb-2">
+          AI Engine is Warming Up
+        </h2>
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-8">
+          Render Cold Start Setup
+        </p>
+
+        {/* Progress Bar Container */}
+        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50 relative mb-4">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-violet-500 to-emerald-500 rounded-full"
+            style={{ width: `${progress}%` }}
+            transition={{ type: "spring", stiffness: 50 }}
+          />
+        </div>
+
+        {/* Progress % and status */}
+        <div className="flex justify-between w-full text-xs font-mono text-slate-500 mb-8">
+          <span className="animate-pulse">{statusText}</span>
+          <span className="font-semibold text-slate-900">{progress}%</span>
+        </div>
+
+        {/* Informative micro-copy */}
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/50 text-left mb-8">
+          <p className="text-slate-600 text-xs leading-relaxed">
+            <span className="font-semibold text-slate-900 block mb-1">Why is this happening?</span>
+            InspectAI is hosted on a free backend instance. It takes about 45-50 seconds to boot up on the very first visit. Once online, the app will react instantly!
+          </p>
+        </div>
+
+        <button 
+          onClick={onLogout}
+          className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-900 transition flex items-center gap-2"
+        >
+          <LogOut className="w-3.5 h-3.5" /> Sign out
+        </button>
+      </motion.div>
+    </div>
+  );
+}
+
   if (loadingContext) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -228,6 +308,10 @@ export default function App() {
     return <LandingPage onLogin={handleLogin} backendReady={backendReady} />;
   }
 
+  if (!backendReady) {
+    return <BackendWarmupScreen user={user} onLogout={handleLogout} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col font-sans text-slate-900 selection:bg-violet-500/30 relative overflow-hidden">
       {/* Background ambient light */}
@@ -238,10 +322,6 @@ export default function App() {
           <span className="text-xl font-display font-medium tracking-tight text-slate-900">{"}"} InspectAI</span>
         </div>
         <div className="flex items-center gap-4">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest hidden md:flex ${backendReady ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.3)]'}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${backendReady ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
-            {backendReady ? 'AI Engine Ready' : 'Waking Up Engine... (~50s)'}
-          </div>
           <div className={`flex items-center gap-2 bg-white border ${apiKeyError ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-200'} rounded-full px-4 py-2 transition-all`}>
              <input 
                type={showApiKey ? "text" : "password"}
