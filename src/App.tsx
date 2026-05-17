@@ -3,7 +3,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, storage } from './lib/firebase';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
@@ -171,6 +171,11 @@ export default function App() {
   }, [apiKey]);
 
   useEffect(() => {
+    // Ensure redirect result is processed on mobile
+    getRedirectResult(auth).catch((err) => {
+      console.error("Redirect auth error:", err);
+    });
+
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoadingContext(false);
