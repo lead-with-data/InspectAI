@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "Inspection": {
+      "title": "Inspection",
+      "description": "A property inspection report generated from a walkthrough video.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pending", "processing", "completed", "error"]
+        },
+        "title": {
+          "type": "string"
+        },
+        "propertyAddress": {
+          "type": "string"
+        },
+        "executiveSummary": {
+          "type": "string"
+        },
+        "riskSummary": {
+          "type": "string"
+        },
+        "repairRecommendations": {
+          "type": "string"
+        },
+        "videoUrl": {
+          "type": "string",
+          "nullable": true
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/entities/Finding"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": ["status", "userId", "createdAt", "updatedAt"]
+    },
+    "Finding": {
+      "title": "Finding",
+      "description": "An issue found during the inspection.",
+      "type": "object",
+      "properties": {
+        "room": { "type": "string" },
+        "issue_type": { "type": "string" },
+        "severity": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
+        "description": { "type": "string" },
+        "estimate_range": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["room", "issue_type", "severity", "description", "estimate_range"]
+    }
+  },
+  "firestore": {
+    "inspections/{inspectionId}": {
+      "schema": { "$ref": "#/entities/Inspection" },
+      "description": "Stores inspection reports."
+    }
+  }
+}

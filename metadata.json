@@ -1,0 +1,6 @@
+{
+  "name": "InspectAI",
+  "description": "AI-Powered Property Inspection Copilot using Gemini multimodal, turning video into structured damage reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

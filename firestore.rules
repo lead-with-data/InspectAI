@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    function isValidInspection(data) {
+      return data.keys().hasAny(['status', 'userId']) && // Minimum required to check, usually we'd do hasAll
+             data.userId == request.auth.uid &&
+             data.status in ['pending', 'processing', 'completed', 'error'];
+    }
+
+    match /userSettings/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /inspections/{inspectionId} {
+      // allow create if user is signed in and owns the inspection instance
+      allow create: if isSignedIn() && isValidId(inspectionId) && incoming().userId == request.auth.uid;
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // For update, allow if the owner is updating it
+      allow update: if isSignedIn() && existing().userId == request.auth.uid && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+      
+      // also need to allow listing, resource.data.userId cannot be used directly in 'list' because 'resource' is the document being accessed, but firestore handles this internally with rules where clauses matching
+      // Actually list does use resource.data
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}
