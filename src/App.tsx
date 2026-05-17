@@ -3,7 +3,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, storage } from './lib/firebase';
 import { handleFirestoreError, OperationType } from './lib/firestore-error';
@@ -180,7 +180,7 @@ export default function App() {
 
   const handleLogin = async () => {
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      await signInWithRedirect(auth, new GoogleAuthProvider());
     } catch (err) {
       console.error(err);
       alert("Failed to login");
