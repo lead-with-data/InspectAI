@@ -5,6 +5,17 @@ import multer from "multer";
 import { GoogleGenAI, Type } from "@google/genai";
 import fs from "fs";
 import os from "os";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3Client = new S3Client({
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT || "https://dummy.r2.cloudflarestorage.com",
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+  },
+});
 
 // Initialize Gemini Client (lazy initialization)
 function getAiClient(apiKey?: string) {
@@ -53,6 +64,34 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
 
   app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+  app.post("/api/upload-url", async (req, res) => {
+    try {
+      const { filename, contentType } = req.body;
+      if (!filename || !contentType) {
+        return res.status(400).json({ error: "filename and contentType are required" });
+      }
+      
+      const key = `videos/${Date.now()}_${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      
+      const command = new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: key,
+        ContentType: contentType,
+      });
+
+      const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+      
+      res.json({ 
+        uploadUrl, 
+        key,
+        publicUrl: `${process.env.R2_PUBLIC_URL}/${key}`
+      });
+    } catch (error: any) {
+      console.error("Presigned URL error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   // API routing
   app.post("/api/analyze-video", upload.single("video"), async (req, res) => {

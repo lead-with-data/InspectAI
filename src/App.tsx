@@ -307,27 +307,54 @@ function Dashboard({ user, apiKey, selectedModel }: { user: User, apiKey: string
 
   const handleSaveReport = async (issues: any[], summary: string, inspectionId?: string, onError?: (error: any) => void) => {
     try {
+      console.log("Starting save report. Inspection ID:", inspectionId);
       if (inspectionId) {
-        // Update existing report
+        console.log("Updating existing report...");
         await updateDoc(doc(db, 'inspections', inspectionId), {
              updatedAt: serverTimestamp(),
              executiveSummary: summary,
              findings: issues,
              repairRecommendations: issues.map(i => i.description).join(', ')
            });
+        console.log("Update complete.");
       } else {
-        if (!activeVideoFile) return;
+        console.log("Creating new report. activeVideoFile:", activeVideoFile);
+        if (!activeVideoFile) {
+           throw new Error("No video file found to save.");
+        }
         
         let videoUrl = null;
         try {
-          const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-          const storageRef = ref(storage, `videos/${user.uid}/${Date.now()}_${activeVideoFile.name}`);
-          const snapshot = await uploadBytes(storageRef, activeVideoFile);
-          videoUrl = await getDownloadURL(snapshot.ref);
+          console.log("Requesting R2 upload URL...");
+          const res = await fetch("/api/upload-url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+               filename: activeVideoFile.name,
+               contentType: activeVideoFile.type 
+            })
+          });
+          
+          if (!res.ok) throw new Error("Failed to get upload URL");
+          
+          const { uploadUrl, publicUrl } = await res.json();
+          
+          console.log("Uploading directly to Cloudflare R2...");
+          const uploadRes = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": activeVideoFile.type },
+            body: activeVideoFile
+          });
+
+          if (!uploadRes.ok) throw new Error("R2 upload failed");
+          
+          videoUrl = publicUrl;
+          console.log("Video uploaded to R2:", videoUrl);
         } catch (e) {
-          console.error("Failed to upload video", e);
+          console.error("Failed to upload video to Cloudflare R2", e);
         }
 
+        console.log("Adding document to Firestore 'inspections' collection...");
         await addDoc(collection(db, 'inspections'), {
           userId: user.uid,
           title: `VideoScan_${activeVideoFile.name.replace(/[^a-zA-Z0-9-]/g, '-').slice(0, 40)}`,
@@ -340,9 +367,11 @@ function Dashboard({ user, apiKey, selectedModel }: { user: User, apiKey: string
           riskSummary: "Generated from video chat",
           repairRecommendations: issues.map(i => i.description).join(', '),
         });
+        console.log("Document added successfully.");
       }
       closeWorkspace();
     } catch (e: any) {
+      console.error("Error in handleSaveReport:", e);
       if (onError) onError(e);
       handleFirestoreError(e, OperationType.WRITE, 'inspections');
     }
