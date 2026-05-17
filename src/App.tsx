@@ -59,6 +59,96 @@ function LandingPage({ onLogin }: { onLogin: () => void }) {
             </div>
           </div>
         </motion.div>
+
+        {/* Bento Box Features Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="mt-24 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6"
+        >
+          {/* Left Large Card - The Home/Video UI */}
+          <div className="lg:col-span-2 bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50 p-4 sm:p-8 flex flex-col">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+              <h3 className="text-3xl font-display font-medium text-slate-900 leading-tight">Size and estimate<br/>property damage fast</h3>
+              <span className="px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold font-mono uppercase tracking-widest rounded-full border border-emerald-100">Real-time Multimodal</span>
+            </div>
+            
+            {/* Video Player Mockup */}
+            <div className="relative w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-inner">
+              <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80" alt="House" className="w-full h-full object-cover opacity-50 mix-blend-luminosity" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+              
+              {/* Bounding Box */}
+              <div className="absolute top-[25%] left-[15%] w-[45%] h-[45%] border-[1.5px] border-emerald-400 bg-emerald-400/10 rounded-lg shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+                <div className="absolute -top-7 left-[-1.5px] bg-emerald-400 text-white text-[10px] font-bold px-3 py-1.5 rounded-sm uppercase tracking-wider flex items-center gap-2">
+                  Water Damage <span className="text-emerald-100 font-mono">98.2%</span>
+                </div>
+                <div className="absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,1)]"></div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="absolute bottom-6 left-6 right-6 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center px-4 gap-4 shadow-lg">
+                <div className="w-4 h-4 rounded-full bg-white flex-shrink-0 flex items-center justify-center shadow-sm">
+                   <div className="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
+                </div>
+                <div className="flex-grow h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div className="w-[40%] h-full bg-emerald-400 rounded-full relative">
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow border border-emerald-500/30"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Tabs */}
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-start sm:justify-between">
+              {['Automotive', 'Real Estate', 'Insurance', 'Construction', 'Restoration'].map((tab, i) => (
+                <div key={tab} className={`px-4 sm:px-6 py-2.5 text-xs font-semibold rounded-xl border ${tab === 'Insurance' ? 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm' : 'border-slate-200 text-slate-500 bg-white hover:bg-slate-50'}`}>
+                  {tab}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Right Small Cards */}
+          <div className="flex flex-col gap-6">
+            {/* Top Feature Card */}
+            <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50 p-8 flex flex-col justify-center relative overflow-hidden flex-1 group hover:border-violet-200 transition-colors">
+              <div className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest mb-6 flex justify-between items-center">
+                Automated Extracted Issues
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+                </div>
+              </div>
+              <h4 className="text-4xl font-display font-medium text-slate-900 mb-3 tracking-tight">Pinpoint Hazards</h4>
+              <p className="text-slate-500 text-sm leading-relaxed mb-8 font-light">
+                Vision AI instantly scans your video feed to extract structural anomalies, logging physical defects without manual entry.
+              </p>
+              <div className="flex items-center justify-between mt-auto pt-2">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div> Unique Hazards
+                </div>
+                <div className="text-[10px] font-bold text-violet-600 bg-violet-50 px-4 py-2 rounded-lg border border-violet-100 uppercase tracking-widest cursor-pointer hover:bg-violet-100 transition-colors">
+                  View Detail →
+                </div>
+              </div>
+            </div>
+            
+            {/* Bottom Feature Card */}
+            <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50 p-8 flex flex-col justify-center flex-1 group hover:border-emerald-200 transition-colors">
+              <div className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest mb-6">Current Repair Liability</div>
+              <h4 className="text-4xl font-display font-medium text-emerald-600 mb-3 tracking-tight">Instant Estimates</h4>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6 font-light">
+                Generates a baseline repair cost on the fly using historical contracting data, giving you an immediate financial assessment.
+              </p>
+              <div className="mt-auto flex items-baseline gap-2 pt-2">
+                 <span className="text-emerald-600 font-mono text-[10px] font-bold uppercase tracking-widest border-b border-emerald-200/50 pb-1">Base Estimate Calculation</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </main>
     </div>
   );
