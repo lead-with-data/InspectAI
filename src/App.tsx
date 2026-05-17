@@ -11,7 +11,7 @@ import { LogIn, Upload, Loader2, FileText, CheckCircle, AlertTriangle, AlertCirc
 import { motion, AnimatePresence } from 'motion/react';
 import { VideoWorkspace } from './components/VideoWorkspace';
 
-function LandingPage({ onLogin }: { onLogin: () => void }) {
+function LandingPage({ onLogin, backendReady }: { onLogin: () => void, backendReady: boolean }) {
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-900 font-sans selection:bg-violet-500/30 relative overflow-hidden flex flex-col">
       {/* Ambient Glows simulating NixtNode/ZeBeyond */}
@@ -28,9 +28,15 @@ function LandingPage({ onLogin }: { onLogin: () => void }) {
           <span className="hover:text-violet-600 cursor-pointer transition">Technology</span>
           <span className="hover:text-violet-600 cursor-pointer transition">Company</span>
         </div>
-        <button onClick={onLogin} className="text-xs font-mono uppercase tracking-widest text-slate-700 hover:text-slate-900 transition-colors bg-white/50 hover:bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
-          Get started
-        </button>
+        <div className="flex items-center gap-4">
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest hidden md:flex ${backendReady ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.3)]'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${backendReady ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
+            {backendReady ? 'AI Engine Ready' : 'Waking Up Engine... (~50s)'}
+          </div>
+          <button onClick={onLogin} className="text-xs font-mono uppercase tracking-widest text-slate-700 hover:text-slate-900 transition-colors bg-white/50 hover:bg-white px-6 py-3 rounded-full border border-slate-200 shadow-sm">
+            Get started
+          </button>
+        </div>
       </nav>
 
       <main className="relative z-10 flex-grow flex flex-col items-center justify-start px-4 sm:px-6 pt-16 pb-32">
@@ -165,6 +171,25 @@ export default function App() {
   const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeyError, setApiKeyError] = useState(false);
+  const [backendReady, setBackendReady] = useState(false);
+
+  useEffect(() => {
+    const pingBackend = async () => {
+      if (backendReady) return;
+      try {
+        const url = import.meta.env.VITE_API_URL || '';
+        const res = await fetch(`${url}/api/health`);
+        if (res.ok) {
+          setBackendReady(true);
+          return;
+        }
+      } catch (err) {
+        // Ignored, will retry
+      }
+      setTimeout(pingBackend, 3000);
+    };
+    pingBackend();
+  }, [backendReady]);
 
   useEffect(() => {
     localStorage.setItem('gemini_api_key', apiKey);
@@ -200,7 +225,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <LandingPage onLogin={handleLogin} />;
+    return <LandingPage onLogin={handleLogin} backendReady={backendReady} />;
   }
 
   return (
@@ -213,6 +238,10 @@ export default function App() {
           <span className="text-xl font-display font-medium tracking-tight text-slate-900">{"}"} InspectAI</span>
         </div>
         <div className="flex items-center gap-4">
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-mono uppercase tracking-widest hidden md:flex ${backendReady ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.3)]'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${backendReady ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
+            {backendReady ? 'AI Engine Ready' : 'Waking Up Engine... (~50s)'}
+          </div>
           <div className={`flex items-center gap-2 bg-white border ${apiKeyError ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-200'} rounded-full px-4 py-2 transition-all`}>
              <input 
                type={showApiKey ? "text" : "password"}
@@ -428,7 +457,8 @@ function Dashboard({ user, apiKey, selectedModel, onApiError }: { user: User, ap
         let videoUrl = null;
         try {
           console.log("Requesting R2 upload URL...");
-          const res = await fetch("/api/upload-url", {
+          const apiUrl = import.meta.env.VITE_API_URL || '';
+          const res = await fetch(`${apiUrl}/api/upload-url`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 

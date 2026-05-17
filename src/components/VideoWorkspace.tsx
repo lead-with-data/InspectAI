@@ -127,7 +127,8 @@ export function VideoWorkspace({ videoFile, videoUrl, inspection, pricingGuideli
           formData.append('pricingGuidelines', pricingGuidelines);
         }
         
-        const res = await fetch('/api/analyze-video', {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const res = await fetch(`${apiUrl}/api/analyze-video`, {
           method: 'POST',
           headers: {
              'X-Gemini-API-Key': apiKey,
@@ -228,7 +229,8 @@ export function VideoWorkspace({ videoFile, videoUrl, inspection, pricingGuideli
     setIsSending(true);
     
     try {
-      const res = await fetch('/api/chat', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

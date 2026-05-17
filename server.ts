@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import multer from "multer";
+import cors from "cors";
 import { GoogleGenAI, Type } from "@google/genai";
 import fs from "fs";
 import os from "os";
@@ -61,6 +62,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.use(cors());
   app.use(express.json({ limit: "50mb" }));
 
   app.get("/api/health", (req, res) => res.json({ status: "ok" }));
