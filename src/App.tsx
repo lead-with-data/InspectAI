@@ -164,6 +164,7 @@ export default function App() {
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || '');
   const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('gemini_api_key', apiKey);
@@ -212,13 +213,16 @@ export default function App() {
           <span className="text-xl font-display font-medium tracking-tight text-slate-900">{"}"} InspectAI</span>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2">
+          <div className={`flex items-center gap-2 bg-white border ${apiKeyError ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-200'} rounded-full px-4 py-2 transition-all`}>
              <input 
                type={showApiKey ? "text" : "password"}
                placeholder="Gemini API Key"
                value={apiKey}
-               onChange={(e) => setApiKey(e.target.value)}
-               className="text-xs font-mono w-24 outline-none"
+               onChange={(e) => {
+                 setApiKey(e.target.value);
+                 setApiKeyError(false);
+               }}
+               className={`text-xs font-mono w-24 outline-none bg-transparent ${apiKeyError ? 'placeholder-rose-400 text-rose-600' : ''}`}
              />
              <button onClick={() => setShowApiKey(!showApiKey)} className="text-slate-400 hover:text-slate-600">
                {showApiKey ? <Eye className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -249,13 +253,13 @@ export default function App() {
       </header>
 
       <main className="relative z-10 flex-grow w-full flex flex-col min-h-0 min-w-0">
-        <Dashboard user={user} apiKey={apiKey} selectedModel={selectedModel} />
+        <Dashboard user={user} apiKey={apiKey} selectedModel={selectedModel} onApiError={() => setApiKeyError(true)} />
       </main>
     </div>
   );
 }
 
-function Dashboard({ user, apiKey, selectedModel }: { user: User, apiKey: string, selectedModel: string }) {
+function Dashboard({ user, apiKey, selectedModel, onApiError }: { user: User, apiKey: string, selectedModel: string, onApiError: () => void }) {
   const [inspections, setInspections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -363,6 +367,14 @@ function Dashboard({ user, apiKey, selectedModel }: { user: User, apiKey: string
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
+    
+    if (!apiKey) {
+      alert("Please enter your Gemini API Key in the top right corner before uploading a video.");
+      onApiError();
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     const file = e.target.files[0];
     
     // Launch the video workspace
