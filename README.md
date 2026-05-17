@@ -2,6 +2,10 @@
 
 **Live Application:** [https://inspectai-e49p.onrender.com/](https://inspectai-e49p.onrender.com/)
 
+
+<img width="940" height="511" alt="image" src="https://github.com/user-attachments/assets/cb2c8df5-7d47-47d0-aad0-acd2eaafd34c" />
+
+
 ## Overview
 InspectAI is a premier inspection intelligence platform designed for property management, restoration, and real estate professionals. It leverages cutting-edge **Gemini 2.5 Flash** vision models to automatically analyze walkthrough videos of properties. It maps the property, detects structural anomalies, identifies code violations, and calculates localized repair cost estimates in real-time.
 
