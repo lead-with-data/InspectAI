@@ -629,14 +629,22 @@ function ReportView({ inspection, onClose }: { inspection: any, onClose: () => v
           <h2 className="font-bold text-slate-800 text-xl tracking-tight mb-1">{inspection.propertyAddress || inspection.title || 'Inspection Report'}</h2>
           <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Generated on {inspection.createdAt?.toDate ? new Date(inspection.createdAt.toDate()).toLocaleDateString() : 'Recently'}</p>
         </div>
-        <button 
-          onClick={exportToPDF} 
-          disabled={isExporting}
-          className="text-xs bg-slate-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2"
-        >
-           {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-           {isExporting ? 'Exporting...' : 'Export PDF'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onClose} 
+            className="text-xs bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-lg font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
+          >
+             Back to Home
+          </button>
+          <button 
+            onClick={exportToPDF} 
+            disabled={isExporting}
+            className="text-xs bg-slate-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2"
+          >
+             {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+             {isExporting ? 'Exporting...' : 'Export PDF'}
+          </button>
+        </div>
       </div>
       
       <div className="p-6 lg:p-8 flex flex-col gap-8 bg-slate-50/30">
